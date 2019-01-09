@@ -61,7 +61,8 @@ def _get_rolling_daily_max(sensor, start_date, end_date, window, tz):
     extended_end_date = (datetime.strptime(end_date, fmt) +
                          timedelta(days=1)).strftime(fmt)
     sensor.get_measurements(start_date=extended_start_date,
-                            end_date=extended_end_date)
+                            end_date=extended_end_date,
+                            quiet=True)
     if tz:
         index = sensor.measurements.index.tz_convert(tz)
         sensor.measurements.index = index
