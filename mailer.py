@@ -2,13 +2,13 @@
 """Mailer.
 
 Usage:
-  mailer.py send [--dry_run] [--incremental]
+  mailer.py send [--dry-run] [--filter=<date>]
   mailer.py (-h | --help)
 
 Options:
-  -h --help      Show this screen.
-  --dry-run      Dry run, do not send mails
-  --incremental  Only mail report to new subscribers
+  -h --help        Show this screen.
+  --dry-run        Dry run, do not send mails
+  --filter=<date>  Only mail report to new subscribers
 
 """
 import datetime
@@ -24,6 +24,7 @@ import os
 import configparser
 import report
 
+
 def get_subscriptions(json_keyfile_name, sheet_name):
     scope = ['https://spreadsheets.google.com/feeds',
             'https://www.googleapis.com/auth/drive']
@@ -35,7 +36,7 @@ def get_subscriptions(json_keyfile_name, sheet_name):
     wks = gc.open(sheet_name).sheet1
     all_values = wks.get_all_values()
     df = pd.DataFrame.from_records(all_values[1:], columns=all_values[0])
-    df.index = pd.to_datetime(df.iloc[:, 0])
+    df.index = pd.to_datetime(df.iloc[:, 0], dayfirst=True)
     df = df.drop(columns=df.index.name)
     return df
 
@@ -111,6 +112,7 @@ def read_config():
 if __name__ == '__main__':
     from docopt import docopt
     import logging
+    import sys
 
     arguments = docopt(__doc__)
 
@@ -119,10 +121,21 @@ if __name__ == '__main__':
         cfg = read_config()
     except RuntimeError as e:
         logging.exception('Could not read config' + repr(e))
+        sys.exit()
 
     subscriptions = get_subscriptions(cfg['gspread']['json_keyfile_name'],
                                       cfg['gspread']['sheet_name'])
+
+    date = arguments['--filter']
+    if date:
+        try:
+            subscriptions = subscriptions[subscriptions.index > date]
+        except ValueError as e:
+            logging.exception('Could not filter subscriptions' + pr(e))
+            sys.exit()
+
     logging.info(subscriptions.describe())
+
     year, month = get_year_month()
     server = build_smtp_server(cfg['smtp_server']['name'],
                                cfg['smtp_server'].getint('port'))
@@ -149,7 +162,7 @@ if __name__ == '__main__':
             for fig, name in zip(figs, sensor_ids[sensor_id]):
                 fig.savefig(name)
 
-        if arguments['--dry_run'] == False:
+        if arguments['--dry-run'] == False:
             logging.info('mail %s for sensor id %s', receiver, sensor_id)
             msg = build_msg(sender, receiver, year, month, sensor_ids[sensor_id])
             server.send_message(msg)
