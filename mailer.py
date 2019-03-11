@@ -158,8 +158,7 @@ if __name__ == '__main__':
 
             figs = report.report_basic_month_overview(
                 sensor, year, month, tz='Europe/Brussels')
-            sensor_ids[sensor_id] = sorted(
-                [fig.name + '.jpg' for fig in figs], reverse=True)
+            sensor_ids[sensor_id] = sorted([fig.name + '.jpg' for fig in figs])
             for fig, name in zip(figs, sensor_ids[sensor_id]):
                 fig.savefig(name)
                 plt.close(fig)
