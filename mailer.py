@@ -56,7 +56,7 @@ def get_year_month():
 
 def build_msg(sender, receiver, year, month, jpg_file_names):
     msg = EmailMessage()
-    msg['Subject'] = 'fijn stof overzicht %s %d' % (report._MONTHS[month], year)
+    msg['Subject'] = '☁️ fijn stof overzicht %s %d ☁️' % (report._MONTHS[month], year)
     msg['From'] = sender
     msg['To'] = receiver
     # msg.preamble = 'fijn stof overzicht'
