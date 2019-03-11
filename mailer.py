@@ -23,6 +23,7 @@ import luftdaten
 import os
 import configparser
 import report
+from matplotlib import pyplot as plt
 
 
 def get_subscriptions(json_keyfile_name, sheet_name):
@@ -161,6 +162,7 @@ if __name__ == '__main__':
                 [fig.name + '.jpg' for fig in figs], reverse=True)
             for fig, name in zip(figs, sensor_ids[sensor_id]):
                 fig.savefig(name)
+                plt.close(fig)
 
         if arguments['--dry-run'] == False:
             logging.info('mail %s for sensor id %s', receiver, sensor_id)
